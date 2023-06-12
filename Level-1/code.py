@@ -12,22 +12,35 @@
 '''
 
 from collections import namedtuple
+from decimal import *
+# from decimal import Decimal
+# from fractions import Fraction
 
 Order = namedtuple('Order', 'id, items')
 Item = namedtuple('Item', 'type, description, amount, quantity')
 
+getcontext().prec = 1000
+getcontext().traps[FloatOperation] = True
+# getcontext().Emax = int(1e19)
+# getcontext().Emin = int(-1e19)
+
 def validorder(order: Order):
-    net = 0
-    
+    # net = 0
+    net = Decimal(0)
     for item in order.items:
         if item.type == 'payment':
-            net += item.amount
+            # net += item.amount * item.quantity
+            net += (Decimal.from_float(item.amount) * Decimal.from_float(item.quantity))
+            # net += (Decimal(item.amount) * Decimal(item.quantity))
         elif item.type == 'product':
-            net -= item.amount * item.quantity
+            # net -= item.amount * item.quantity
+            net -= (Decimal.from_float(item.amount) * Decimal.from_float(item.quantity))
+            # net -= (Decimal(item.amount) * Decimal(item.quantity))
         else:
             return("Invalid item type: %s" % item.type)
-    
-    if net != 0:
+    # print(net)
+    # if net > Decimal(1e-5):
+    if abs(net) > Decimal.from_float(1e-5):
         return("Order ID: %s - Payment imbalance: $%0.2f" % (order.id, net))
     else:
         return("Order ID: %s - Full payment received!" % order.id)
